@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from flask import Flask, request, jsonify
 from serpapi import GoogleSearch
 from flask_cors import CORS
@@ -7,6 +8,20 @@ app = Flask(__name__)
 CORS(app)
 
 SERPAPI_API_KEY = os.getenv("SERPAPI_API_KEY", "TA_CLE_SERPAPI_ICI")
+
+# Dictionnaire des journées mondiales importantes (jour-mois : nom)
+JOURNEES_MONDALES = {
+    "02-04": "Journée mondiale de sensibilisation à l’autisme",
+    "06-11": "Journée mondiale de la prévention des risques professionnels",
+    "28-04": "Journée mondiale de la sécurité et de la santé au travail",
+    "25-11": "Journée internationale pour l’élimination de la violence à l’égard des femmes",
+    # Ajoute d’autres journées au besoin
+}
+
+def journee_du_jour():
+    today = datetime.now()
+    cle = today.strftime("%d-%m")
+    return JOURNEES_MONDALES.get(cle, None)
 
 def rechercher_hashtags(mot_cle, reseau):
     query = f"site:{reseau}.com #{mot_cle}"
@@ -35,25 +50,29 @@ def rechercher_hashtags(mot_cle, reseau):
 @app.route('/api/genere-post', methods=['POST'])
 def genere_post():
     data = request.get_json()
-    mois = data.get('mois', '08')
-    annee = data.get('annee', '2025')
+    mois = data.get('mois', None)
+    annee = data.get('annee', None)
     reseaux = data.get('reseaux', [])
 
-    evenements = {
-        "03": "Journée internationale du droit des femmes",
-        "09": "Journée internationale du secourisme",
-        "10": "Mois de la sensibilisation au cancer du sein",
-    }
-
-    evenement_du_mois = evenements.get(mois, None)
+    evenement_du_jour = journee_du_jour()
 
     postages = {}
     for reseau in reseaux:
-        texte = f"Post automatique pour {reseau} en {mois}/{annee}."
-        if evenement_du_mois:
-            texte += f" C’est le moment de célébrer : {evenement_du_mois}."
+        # Texte de base selon jour ou non
+        if evenement_du_jour:
+            texte = f"Aujourd'hui, c'est {evenement_du_jour} ! Chez Passion Prévention, nous sommes mobilisés pour votre sécurité."
         else:
-            texte += " Restez vigilants toute l'année sur vos thématiques sécurité."
+            texte = "Chez Passion Prévention, votre sécurité est notre priorité toute l'année !"
+
+        # Personnalisation simple par réseau social
+        if reseau == "linkedin":
+            texte += " Découvrez nos formations et équipements professionnels adaptés."
+        elif reseau == "tiktok":
+            texte += " Testez nos bornes éthylotest en vidéo ! #fun #sécurité"
+        elif reseau == "facebook":
+            texte += " Rejoignez notre communauté et restez informés des bonnes pratiques."
+        elif reseau == "instagram":
+            texte += " Suivez-nous pour des astuces et conseils en prévention."
 
         hashtags = rechercher_hashtags("sécurité", reseau)
 
