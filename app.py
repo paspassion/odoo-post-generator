@@ -7,7 +7,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-SERPAPI_API_KEY = os.getenv("SERPAPI_API_KEY", "TA_CLE_SERPAPI_ICI")
+SERPAPI_API_KEY = os.getenv("SERPAPI_API_KEY", "91ab2470b52f1166f64f1267c08e3a3792c1df343c4936a597fb3e0a762c66f3")
 
 # Dictionnaire des journées mondiales importantes (jour-mois : nom)
 JOURNEES_MONDALES = {
@@ -85,3 +85,4 @@ def genere_post():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
+
