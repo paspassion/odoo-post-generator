@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Générateur de posts réseaux sociaux</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 1rem; }
+  label, select, input { display: block; margin: 0.5rem 0; }
+  button { padding: 0.5rem 1rem; background: #007bff; color: #fff; border: none; cursor: pointer; }
+  button:hover { background: #0056b3; }
+  .post { border: 1px solid #ddd; padding: 1rem; margin-top: 1rem; }
+</style>
+</head>
+<body>
+
+<h1>Générateur de posts réseaux sociaux</h1>
+
+<label for="mois">Choisis un mois :</label>
+<select id="mois">
+  <option value="aout">Août</option>
+  <option value="septembre">Septembre</option>
+  <option value="octobre">Octobre</option>
+</select>
+
+<fieldset>
+  <legend>Réseaux sociaux :</legend>
+  <label><input type="checkbox" name="reseaux" value="facebook" checked> Facebook</label>
+  <label><input type="checkbox" name="reseaux" value="instagram" checked> Instagram</label>
+  <label><input type="checkbox" name="reseaux" value="linkedin" checked> LinkedIn</label>
+  <label><input type="checkbox" name="reseaux" value="tiktok" checked> TikTok</label>
+</fieldset>
+
+<button id="generateBtn">Générer les posts</button>
+
+<div id="posts"></div>
+<div id="error" style="color:red;"></div>
+
+<script>
+document.getElementById('generateBtn').onclick = async function() {
+  const mois = document.getElementById('mois').value;
+  const reseaux = Array.from(document.querySelectorAll('input[name="reseaux"]:checked')).map(el => el.value);
+  const postsDiv = document.getElementById('posts');
+  const errorDiv = document.getElementById('error');
+
+  postsDiv.innerHTML = '';
+  errorDiv.textContent = '';
+
+  if (reseaux.length === 0) {
+    errorDiv.textContent = 'Veuillez sélectionner au moins un réseau social.';
+    return;
+  }
+
+  try {
+    const res = await fetch('https://odoo-post-generator.onrender.com/api/genere-post', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({mois, reseaux})
+    });
+    if (!res.ok) throw new Error('Erreur API '+res.status);
+    const data = await res.json();
+
+    for(const r of reseaux) {
+      const p = data.postages[r];
+      if(p) {
+        const div = document.createElement('div');
+        div.className = 'post';
+        div.innerHTML = `<h3>${r.toUpperCase()}</h3><p>${p.texte}</p><p><strong>Hashtags:</strong> ${p.hashtags.join(' ')}</p>`;
+        postsDiv.appendChild(div);
+      }
+    }
+  } catch(e) {
+    errorDiv.textContent = e.message;
+  }
+};
+</script>
+
+</body>
+</html>
