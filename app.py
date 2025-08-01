@@ -6,7 +6,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-SERPAPI_API_KEY = os.getenv("SERPAPI_API_KEY", "TA_CLE_SERPAPI_ICI")
+SERPAPI_API_KEY = os.getenv("SERPAPI_API_KEY", "91ab2470b52f1166f64f1267c08e3a3792c1df343c4936a597fb3e0a762c66f3")
 
 def rechercher_hashtags(mot_cle, reseau):
     query = f"site:{reseau}.com #{mot_cle}"
