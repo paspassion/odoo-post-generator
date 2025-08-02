@@ -1,88 +1,67 @@
-import os
-from datetime import datetime
 from flask import Flask, request, jsonify
-from serpapi import GoogleSearch
 from flask_cors import CORS
+import os
+import random
+import json
+from datetime import datetime
 
+# Initialisation Flask
 app = Flask(__name__)
 CORS(app)
 
-SERPAPI_API_KEY = os.getenv("SERPAPI_API_KEY", "91ab2470b52f1166f64f1267c08e3a3792c1df343c4936a597fb3e0a762c66f3")
+# Lecture du contenu
+with open('contenu_site.json', encoding='utf-8') as f:
+    CONTENU_SITE = json.load(f)
 
-# Dictionnaire des journées mondiales importantes (jour-mois : nom)
-JOURNEES_MONDALES = {
-    "02-04": "Journée mondiale de sensibilisation à l’autisme",
-    "06-11": "Journée mondiale de la prévention des risques professionnels",
-    "28-04": "Journée mondiale de la sécurité et de la santé au travail",
-    "25-11": "Journée internationale pour l’élimination de la violence à l’égard des femmes",
-    # Ajoute d’autres journées au besoin
-}
+with open('journees.json', encoding='utf-8') as f:
+    JOURNEES_MONDALES = json.load(f)
 
 def journee_du_jour():
-    today = datetime.now()
-    cle = today.strftime("%d-%m")
-    return JOURNEES_MONDALES.get(cle, None)
+    today = datetime.now().strftime("%d-%m")
+    return JOURNEES_MONDALES.get(today)
 
-def rechercher_hashtags(mot_cle, reseau):
-    query = f"site:{reseau}.com #{mot_cle}"
-    params = {
-        "engine": "google",
-        "q": query,
-        "api_key": SERPAPI_API_KEY,
-        "num": 10
-    }
-    try:
-        search = GoogleSearch(params)
-        results = search.get_dict()
-        hashtags = {}
-        for item in results.get("organic_results", []):
-            title = item.get("title", "")
-            for word in title.split():
-                if word.startswith("#"):
-                    hashtags[word] = hashtags.get(word, 0) + 1
-        sorted_tags = sorted(hashtags.items(), key=lambda x: x[1], reverse=True)
-        top_tags = [tag for tag, _ in sorted_tags[:10]]
-        return top_tags if top_tags else ["#sécurité", "#prévention"]
-    except Exception as e:
-        print("Erreur SerpAPI:", e)
-        return ["#sécurité", "#prévention"]
+def journees_a_venir(n=5):
+    aujourd_hui = datetime.now()
+    resultats = []
+    for k, v in JOURNEES_MONDALES.items():
+        try:
+            date_obj = datetime.strptime(k, "%d-%m").replace(year=aujourd_hui.year)
+            if date_obj >= aujourd_hui:
+                resultats.append((date_obj, v))
+        except:
+            continue
+    resultats = sorted(resultats)[:n]
+    return [{"date": d.strftime("%d-%m"), "intitule": t} for d, t in resultats]
 
 @app.route('/api/genere-post', methods=['POST'])
 def genere_post():
     data = request.get_json()
-    mois = data.get('mois', None)
-    annee = data.get('annee', None)
+    mois = data.get('mois')
+    annee = data.get('annee')
     reseaux = data.get('reseaux', [])
 
-    evenement_du_jour = journee_du_jour()
+    evenement = journee_du_jour()
+    posts = {}
 
-    postages = {}
-    for reseau in reseaux:
-        # Texte de base selon jour ou non
-        if evenement_du_jour:
-            texte = f"Aujourd'hui, c'est {evenement_du_jour} ! Chez Passion Prévention, nous sommes mobilisés pour votre sécurité."
+    for r in reseaux:
+        if evenement:
+            texte = f"📅 En cette {evenement}, pensez à votre sécurité avec {random.choice(CONTENU_SITE['produits'])}."
         else:
-            texte = "Chez Passion Prévention, votre sécurité est notre priorité toute l'année !"
+            texte = f"🔒 Chez Passion Prévention, la sécurité c’est toute l’année ! Découvrez : {random.choice(CONTENU_SITE['services'])}."
 
-        # Personnalisation simple par réseau social
-        if reseau == "linkedin":
-            texte += " Découvrez nos formations et équipements professionnels adaptés."
-        elif reseau == "tiktok":
-            texte += " Testez nos bornes éthylotest en vidéo ! #fun #sécurité"
-        elif reseau == "facebook":
-            texte += " Rejoignez notre communauté et restez informés des bonnes pratiques."
-        elif reseau == "instagram":
-            texte += " Suivez-nous pour des astuces et conseils en prévention."
+        if r == "facebook":
+            texte += " Rejoignez-nous pour plus de conseils."
+        elif r == "instagram":
+            texte += " Inspirez-vous avec nos astuces sécurité !"
+        elif r == "linkedin":
+            texte += " Nos formations pro sont là pour vous."
+        elif r == "tiktok":
+            texte += " À tester en vidéo !"
 
-        hashtags = rechercher_hashtags("sécurité", reseau)
+        hashtags = ["#Sécurité", "#Prévention", "#PassionPrévention"]
+        posts[r] = {"texte": texte, "hashtags": hashtags}
 
-        postages[reseau] = {
-            "texte": texte,
-            "hashtags": hashtags
-        }
-
-    return jsonify({"postages": postages})
+    return jsonify({"postages": posts, "journees_a_venir": journees_a_venir()})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
-
+    app.run(host='0.0.0.0', port=10000)
