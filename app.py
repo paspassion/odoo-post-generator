@@ -1,20 +1,20 @@
+
 import os, random, json
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from datetime import datetime, timedelta
 
-app = Flask(__name__, static_folder='static')  # déclaration du dossier static
+app = Flask(__name__, static_folder="static")
 CORS(app)
 
-# Clé API (optionnelle si non utilisée)
-SERPAPI_API_KEY = os.getenv("SERPAPI_API_KEY", "91ab2470b52f1166f64f1267c08e3a3792c1df343c4936a597fb3e0a762c66f3")
-
-# Chargement des données
 with open('contenu_site.json', encoding='utf-8') as f:
     CONTENU_SITE = json.load(f)
-
 with open('journees.json', encoding='utf-8') as f:
     JOURNEES = json.load(f)
+
+@app.route('/')
+def home():
+    return send_from_directory('static', 'index.html')
 
 def journee_du_jour():
     today = datetime.now()
@@ -27,10 +27,7 @@ def journees_a_venir(n=5):
         d = today + timedelta(days=i)
         cle = d.strftime("%d-%m")
         if cle in JOURNEES:
-            resultats.append({
-                "date": d.strftime("%d/%m/%Y"),
-                "evenement": JOURNEES[cle]
-            })
+            resultats.append({"date": d.strftime("%d/%m/%Y"), "evenement": JOURNEES[cle]})
             if len(resultats) >= n:
                 break
     return resultats
@@ -64,12 +61,6 @@ def genere_post():
 
     return jsonify({"postages": postages})
 
-# ✅ Route principale pour servir index.html
-@app.route('/')
-def home():
-    return send_from_directory('static', 'index.html')
-
-# ✅ Démarrage de l'application (compatible Render)
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
