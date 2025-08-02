@@ -1,114 +1,145 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Générateur de posts réseaux sociaux</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 1rem; }
-    label, select, input { display: block; margin: 0.5rem 0; }
-    button { padding: 0.5rem 1rem; background: #007bff; color: #fff; border: none; cursor: pointer; }
-    button:hover { background: #0056b3; }
-    .post { border: 1px solid #ddd; padding: 1rem; margin-top: 1rem; }
-    #progressContainer { width: 100%; background-color: #ddd; border-radius: 5px; margin-top: 1rem; height: 20px; overflow: hidden; }
-    #progressBar { height: 100%; width: 0%; background-color: #4caf50; text-align: center; color: white; line-height: 20px; transition: width 0.3s ease; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Générateur de posts réseaux sociaux</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 1rem; }
+  label, select, input { display: block; margin: 0.5rem 0; }
+  button { padding: 0.5rem 1rem; background: #007bff; color: #fff; border: none; cursor: pointer; }
+  button:hover { background: #0056b3; }
+  .post { border: 1px solid #ddd; padding: 1rem; margin-top: 1rem; }
+  #progressContainer {
+    width: 100%;
+    background-color: #ddd;
+    border-radius: 5px;
+    margin-top: 1rem;
+    height: 20px;
+    overflow: hidden;
+  }
+  #progressBar {
+    height: 100%;
+    width: 0%;
+    background-color: #4caf50;
+    text-align: center;
+    color: white;
+    line-height: 20px;
+    transition: width 0.3s ease;
+  }
+</style>
 </head>
 <body>
-  <h1>Générateur de posts réseaux sociaux</h1>
 
-  <label for="mois">Choisis un mois :</label>
-  <select id="mois">
-    <option value="01">Janvier</option><option value="02">Février</option><option value="03">Mars</option>
-    <option value="04">Avril</option><option value="05">Mai</option><option value="06">Juin</option>
-    <option value="07">Juillet</option><option value="08">Août</option><option value="09">Septembre</option>
-    <option value="10">Octobre</option><option value="11">Novembre</option><option value="12">Décembre</option>
-  </select>
+<h1>Générateur de posts réseaux sociaux</h1>
 
-  <label for="annee">Choisis une année :</label>
-  <select id="annee">
-    <option value="2024">2024</option>
-    <option value="2025" selected>2025</option>
-    <option value="2026">2026</option>
-    <option value="2027">2027</option>
-  </select>
+<label for="mois">Choisis un mois :</label>
+<select id="mois">
+  <option value="01">Janvier</option>
+  <option value="02">Février</option>
+  <option value="03">Mars</option>
+  <option value="04">Avril</option>
+  <option value="05">Mai</option>
+  <option value="06">Juin</option>
+  <option value="07">Juillet</option>
+  <option value="08">Août</option>
+  <option value="09">Septembre</option>
+  <option value="10">Octobre</option>
+  <option value="11">Novembre</option>
+  <option value="12">Décembre</option>
+</select>
 
-  <fieldset>
-    <legend>Réseaux sociaux :</legend>
-    <label><input type="checkbox" name="reseaux" value="facebook" checked> Facebook</label>
-    <label><input type="checkbox" name="reseaux" value="instagram" checked> Instagram</label>
-    <label><input type="checkbox" name="reseaux" value="linkedin" checked> LinkedIn</label>
-    <label><input type="checkbox" name="reseaux" value="tiktok" checked> TikTok</label>
-  </fieldset>
+<label for="annee">Choisis une année :</label>
+<select id="annee">
+  <option value="2024">2024</option>
+  <option value="2025" selected>2025</option>
+  <option value="2026">2026</option>
+  <option value="2027">2027</option>
+</select>
 
-  <button id="generateBtn">Générer les posts</button>
+<fieldset>
+  <legend>Réseaux sociaux :</legend>
+  <label><input type="checkbox" name="reseaux" value="facebook" checked> Facebook</label>
+  <label><input type="checkbox" name="reseaux" value="instagram" checked> Instagram</label>
+  <label><input type="checkbox" name="reseaux" value="linkedin" checked> LinkedIn</label>
+  <label><input type="checkbox" name="reseaux" value="tiktok" checked> TikTok</label>
+</fieldset>
 
-  <div id="progressContainer" style="display:none;">
-    <div id="progressBar">0%</div>
-  </div>
+<button id="generateBtn">Générer les posts</button>
 
-  <div id="posts"></div>
-  <div id="journees"></div>
-  <div id="error" style="color:red;"></div>
+<div id="progressContainer" style="display:none;">
+  <div id="progressBar">0%</div>
+</div>
 
-  <script>
-    document.getElementById('generateBtn').onclick = async function() {
-      const mois = document.getElementById('mois').value;
-      const annee = document.getElementById('annee').value;
-      const reseaux = Array.from(document.querySelectorAll('input[name="reseaux"]:checked')).map(el => el.value);
-      const postsDiv = document.getElementById('posts');
-      const journeesDiv = document.getElementById('journees');
-      const errorDiv = document.getElementById('error');
-      const progressContainer = document.getElementById('progressContainer');
-      const progressBar = document.getElementById('progressBar');
+<div id="posts"></div>
+<div id="journeesAvenir"></div>
+<div id="error" style="color:red;"></div>
 
-      postsDiv.innerHTML = '';
-      journeesDiv.innerHTML = '';
-      errorDiv.textContent = '';
-      progressBar.style.width = '0%';
-      progressBar.textContent = '0%';
-      progressContainer.style.display = 'block';
+<script>
+document.getElementById('generateBtn').onclick = async function() {
+  const mois = document.getElementById('mois').value;
+  const annee = document.getElementById('annee').value;
+  const reseaux = Array.from(document.querySelectorAll('input[name="reseaux"]:checked')).map(el => el.value);
+  const postsDiv = document.getElementById('posts');
+  const errorDiv = document.getElementById('error');
+  const progressContainer = document.getElementById('progressContainer');
+  const progressBar = document.getElementById('progressBar');
+  const journeesDiv = document.getElementById('journeesAvenir');
 
-      if (reseaux.length === 0) {
-        errorDiv.textContent = 'Veuillez sélectionner au moins un réseau social.';
-        progressContainer.style.display = 'none';
-        return;
-      }
+  postsDiv.innerHTML = '';
+  journeesDiv.innerHTML = '';
+  errorDiv.textContent = '';
+  progressBar.style.width = '0%';
+  progressBar.textContent = '0%';
+  progressContainer.style.display = 'block';
 
-      try {
-        const res = await fetch('https://odoo-post-generator.onrender.com/api/genere-post', {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({mois, annee, reseaux})
-        });
-        if (!res.ok) throw new Error('Erreur API '+res.status);
-        const data = await res.json();
+  if (reseaux.length === 0) {
+    errorDiv.textContent = 'Veuillez sélectionner au moins un réseau social.';
+    progressContainer.style.display = 'none';
+    return;
+  }
 
-        for(let i = 0; i < reseaux.length; i++) {
-          const r = reseaux[i];
-          const p = data.postages[r];
-          if(p) {
-            const div = document.createElement('div');
-            div.className = 'post';
-            div.innerHTML = `<h3>${r.toUpperCase()}</h3><p>${p.texte}</p><p><strong>Hashtags:</strong> ${p.hashtags.join(' ')}</p>`;
-            postsDiv.appendChild(div);
-          }
-          let progressPercent = Math.round(((i+1) / reseaux.length) * 100);
-          progressBar.style.width = progressPercent + '%';
-          progressBar.textContent = progressPercent + '%';
-          await new Promise(r => setTimeout(r, 300));
+  try {
+    const res = await fetch('https://odoo-post-generator.onrender.com/api/genere-post', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({mois, annee, reseaux})
+    });
+    if (!res.ok) throw new Error('Erreur API '+res.status);
+    const data = await res.json();
+
+    for(let i = 0; i < reseaux.length; i++) {
+      const r = reseaux[i];
+      const p = data.postages[r];
+      if(p) {
+        const div = document.createElement('div');
+        div.className = 'post';
+        div.innerHTML = `<h3>${r.toUpperCase()}</h3><p>${p.texte}</p><p><strong>Hashtags:</strong> ${p.hashtags.join(' ')}</p>`;
+        postsDiv.appendChild(div);
+
+        if (i === 0 && p.avenir) {
+          let jours = '<h3>📅 Journées à venir :</h3><ul>';
+          p.avenir.forEach(j => {
+            jours += `<li><strong>${j.date}</strong> : ${j.evenement}</li>`;
+          });
+          jours += '</ul>';
+          journeesDiv.innerHTML = jours;
         }
-
-        if(data.journees_a_venir?.length > 0){
-          const list = data.journees_a_venir.map(j => `<li>${j.date} : ${j.nom}</li>`).join("");
-          journeesDiv.innerHTML = `<h2>Journées internationales à venir :</h2><ul>${list}</ul>`;
-        }
-      } catch(e) {
-        errorDiv.textContent = e.message;
-      } finally {
-        setTimeout(() => { progressContainer.style.display = 'none'; }, 1500);
       }
-    };
-  </script>
+      let progressPercent = Math.round(((i+1) / reseaux.length) * 100);
+      progressBar.style.width = progressPercent + '%';
+      progressBar.textContent = progressPercent + '%';
+      await new Promise(r => setTimeout(r, 300));
+    }
+  } catch(e) {
+    errorDiv.textContent = e.message;
+  } finally {
+    setTimeout(() => {
+      progressContainer.style.display = 'none';
+    }, 1500);
+  }
+};
+</script>
+
 </body>
 </html>
