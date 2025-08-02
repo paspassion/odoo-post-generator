@@ -60,4 +60,8 @@ def genere_post():
     return jsonify({"postages": postages})
 
 if __name__ == '__main__':
-    app.run(port=10000)
+    import os
+
+port = int(os.environ.get("PORT", 5000))  # Render utilise cette variable automatiquement
+app.run(host='0.0.0.0', port=port)
+
