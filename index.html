@@ -97,7 +97,8 @@ document.getElementById('generateBtn').onclick = async function() {
   }
 
   try {
-    const res = await fetch('https://odoo-post-generator.onrender.com/api/genere-post', {
+    const res = await fetch('fetch('http://127.0.0.1:10000/api/genere-post'...
+', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({mois, annee, reseaux})
@@ -132,3 +133,4 @@ document.getElementById('generateBtn').onclick = async function() {
 
 </body>
 </html>
+
