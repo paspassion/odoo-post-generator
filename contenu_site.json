@@ -1,1 +1,28 @@
-{"produits": ["Extincteur", "Kit de secours"]}
+{
+  "services": [
+    "formations sécurité incendie",
+    "location de bornes éthylotests",
+    "sensibilisation à la sécurité routière",
+    "étalonnage de bornes éthylotests professionnelles",
+    "formation à l’évacuation",
+    "habilitation électrique NFC 18-510"
+  ],
+  "produits": [
+    "gilets haute visibilité",
+    "bornes éthylotests murales",
+    "extincteurs à poudre",
+    "panneaux de sécurité",
+    "kits EPI pour chantier",
+    "signalisation temporaire",
+    "affiches prévention personnalisables"
+  ],
+  "conseils": [
+    "Soyez toujours visible sur la route ou le chantier.",
+    "Ne conduisez jamais après avoir bu, testez-vous.",
+    "Equipez vos locaux en extincteurs conformes.",
+    "Formez vos salariés à l’évacuation d’urgence.",
+    "Respectez les habilitations électriques requises.",
+    "Installez des bornes éthylotests en sortie de soirée.",
+    "Portez un gilet haute visibilité dans chaque véhicule."
+  ]
+}
