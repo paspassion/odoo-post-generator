@@ -1,33 +1,33 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Générateur de posts réseaux sociaux</title>
-<style>
-  body { font-family: Arial, sans-serif; padding: 1rem; }
-  label, select, input { display: block; margin: 0.5rem 0; }
-  button { padding: 0.5rem 1rem; background: #007bff; color: #fff; border: none; cursor: pointer; }
-  button:hover { background: #0056b3; }
-  .post { border: 1px solid #ddd; padding: 1rem; margin-top: 1rem; }
-  #progressContainer {
-    width: 100%;
-    background-color: #ddd;
-    border-radius: 5px;
-    margin-top: 1rem;
-    height: 20px;
-    overflow: hidden;
-  }
-  #progressBar {
-    height: 100%;
-    width: 0%;
-    background-color: #4caf50;
-    text-align: center;
-    color: white;
-    line-height: 20px;
-    transition: width 0.3s ease;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Générateur de posts réseaux sociaux</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 1rem; }
+    label, select, input { display: block; margin: 0.5rem 0; }
+    button { padding: 0.5rem 1rem; background: #007bff; color: #fff; border: none; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    .post { border: 1px solid #ddd; padding: 1rem; margin-top: 1rem; }
+    #progressContainer {
+      width: 100%;
+      background-color: #ddd;
+      border-radius: 5px;
+      margin-top: 1rem;
+      height: 20px;
+      overflow: hidden;
+    }
+    #progressBar {
+      height: 100%;
+      width: 0%;
+      background-color: #4caf50;
+      text-align: center;
+      color: white;
+      line-height: 20px;
+      transition: width 0.3s ease;
+    }
+  </style>
 </head>
 <body>
 
@@ -42,7 +42,7 @@
   <option value="05">Mai</option>
   <option value="06">Juin</option>
   <option value="07">Juillet</option>
-  <option value="08">Août</option>
+  <option value="08" selected>Août</option>
   <option value="09">Septembre</option>
   <option value="10">Octobre</option>
   <option value="11">Novembre</option>
@@ -72,7 +72,10 @@
 </div>
 
 <div id="posts"></div>
-<div id="journeesAvenir"></div>
+
+<h2>📅 Journées mondiales à venir</h2>
+<ul id="journees-avenir"></ul>
+
 <div id="error" style="color:red;"></div>
 
 <script>
@@ -84,10 +87,8 @@ document.getElementById('generateBtn').onclick = async function() {
   const errorDiv = document.getElementById('error');
   const progressContainer = document.getElementById('progressContainer');
   const progressBar = document.getElementById('progressBar');
-  const journeesDiv = document.getElementById('journeesAvenir');
 
   postsDiv.innerHTML = '';
-  journeesDiv.innerHTML = '';
   errorDiv.textContent = '';
   progressBar.style.width = '0%';
   progressBar.textContent = '0%';
@@ -116,15 +117,6 @@ document.getElementById('generateBtn').onclick = async function() {
         div.className = 'post';
         div.innerHTML = `<h3>${r.toUpperCase()}</h3><p>${p.texte}</p><p><strong>Hashtags:</strong> ${p.hashtags.join(' ')}</p>`;
         postsDiv.appendChild(div);
-
-        if (i === 0 && p.avenir) {
-          let jours = '<h3>📅 Journées à venir :</h3><ul>';
-          p.avenir.forEach(j => {
-            jours += `<li><strong>${j.date}</strong> : ${j.evenement}</li>`;
-          });
-          jours += '</ul>';
-          journeesDiv.innerHTML = jours;
-        }
       }
       let progressPercent = Math.round(((i+1) / reseaux.length) * 100);
       progressBar.style.width = progressPercent + '%';
@@ -139,6 +131,21 @@ document.getElementById('generateBtn').onclick = async function() {
     }, 1500);
   }
 };
+
+// Charger les journées à venir
+fetch('https://odoo-post-generator.onrender.com/api/journees-prochaines')
+  .then(res => res.json())
+  .then(data => {
+    const ul = document.getElementById('journees-avenir');
+    data.journees.forEach(j => {
+      const li = document.createElement('li');
+      li.textContent = `${j.date} — ${j.nom}`;
+      ul.appendChild(li);
+    });
+  })
+  .catch(err => {
+    document.getElementById('journees-avenir').innerHTML = '<li>Erreur lors du chargement des journées.</li>';
+  });
 </script>
 
 </body>
