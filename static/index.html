@@ -1,6 +1,71 @@
-
 <!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8"><title>Post Generator</title></head>
-<body><h1>Générateur de posts réseaux sociaux</h1></body>
+<head>
+  <meta charset="UTF-8" />
+  <title>Générateur de posts réseaux sociaux</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: sans-serif; margin: 2rem; }
+    h1 { color: #1c3faa; }
+    label, select, input { display: block; margin-top: 1rem; }
+    button { margin-top: 1rem; padding: 0.5rem 1rem; }
+    .result { margin-top: 2rem; background: #f0f0f0; padding: 1rem; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>🛠️ Générateur de posts réseaux sociaux</h1>
+
+  <label>Mois :</label>
+  <select id="mois">
+    <option value="août">Août</option>
+    <option value="septembre">Septembre</option>
+    <option value="octobre">Octobre</option>
+  </select>
+
+  <label>Année :</label>
+  <input type="number" id="annee" value="2025" />
+
+  <label>Réseaux sociaux :</label>
+  <input type="checkbox" value="Facebook" checked /> Facebook
+  <input type="checkbox" value="Instagram" checked /> Instagram
+  <input type="checkbox" value="LinkedIn" checked /> LinkedIn
+  <input type="checkbox" value="TikTok" checked /> TikTok
+
+  <button onclick="generer()">🎯 Générer les posts</button>
+
+  <div class="result" id="resultat"></div>
+
+  <h2>📅 Journées mondiales à venir</h2>
+  <ul id="jours"></ul>
+
+  <script>
+    async function generer() {
+      const mois = document.getElementById('mois').value;
+      const annee = document.getElementById('annee').value;
+      const reseaux = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(el => el.value);
+
+      const res = await fetch('/api/genere-post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mois, annee, reseaux })
+      });
+
+      const data = await res.json();
+      const r = document.getElementById('resultat');
+      r.innerHTML = '';
+
+      for (const [key, val] of Object.entries(data.postages)) {
+        r.innerHTML += `<h3>${key}</h3><p>${val.texte}</p><p>${val.hashtags.join(' ')}</p>`;
+      }
+
+      const jours = document.getElementById('jours');
+      jours.innerHTML = '';
+      if (data.postages[reseaux[0]].avenir) {
+        data.postages[reseaux[0]].avenir.forEach(j => {
+          jours.innerHTML += `<li><strong>${j.date}</strong> : ${j.evenement}</li>`;
+        });
+      }
+    }
+  </script>
+</body>
 </html>
