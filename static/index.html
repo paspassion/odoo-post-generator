@@ -10,20 +10,12 @@
     label, select, input { display: block; margin-top: 1rem; }
     button { margin-top: 1rem; padding: 0.5rem 1rem; }
     .result { margin-top: 2rem; background: #f0f0f0; padding: 1rem; border-radius: 8px; }
+    #loader { margin-top: 1rem; font-style: italic; color: grey; }
   </style>
 </head>
 <body>
   <h1>🛠️ Générateur de posts réseaux sociaux</h1>
-
-  <label>Mois :</label>
-  <select id="mois">
-    <option value="août">Août</option>
-    <option value="septembre">Septembre</option>
-    <option value="octobre">Octobre</option>
-  </select>
-
-  <label>Année :</label>
-  <input type="number" id="annee" value="2025" />
+  <div id="dateDuJour"></div>
 
   <label>Réseaux sociaux :</label>
   <input type="checkbox" value="Facebook" checked /> Facebook
@@ -31,31 +23,58 @@
   <input type="checkbox" value="LinkedIn" checked /> LinkedIn
   <input type="checkbox" value="TikTok" checked /> TikTok
 
-  <button onclick="generer()">🎯 Générer les posts</button>
+  <label>Style de post :</label>
+  <select id="style">
+    <option value="auto">Aléatoire</option>
+    <option value="prevention">Prévention</option>
+    <option value="humour">Humour</option>
+    <option value="citation">Citation</option>
+  </select>
 
+  <label>Date spécifique (facultatif) :</label>
+  <input type="date" id="datepick" />
+
+  <button onclick="generer()">🎯 Générer les posts</button>
+  <button onclick="genererAleatoire()">🔄 Générer un post aléatoire</button>
+
+  <div id="loader">⏳ Chargement en cours...</div>
   <div class="result" id="resultat"></div>
 
   <h2>📅 Journées mondiales à venir</h2>
   <ul id="jours"></ul>
 
+  <h2>📚 Historique</h2>
+  <div class="result" id="historique"></div>
+
   <script>
+    const moisFR = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+    const today = new Date();
+    const jour = String(today.getDate()).padStart(2, '0');
+    const mois = moisFR[today.getMonth()];
+    const annee = today.getFullYear();
+    document.getElementById('dateDuJour').innerText = `📆 Aujourd'hui : ${jour} ${mois} ${annee}`;
+
     async function generer() {
-      const mois = document.getElementById('mois').value;
-      const annee = document.getElementById('annee').value;
+      document.getElementById('loader').style.display = "block";
       const reseaux = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(el => el.value);
+      const style = document.getElementById('style').value;
+      const datepick = document.getElementById('datepick').value;
 
       const res = await fetch('/api/genere-post', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mois, annee, reseaux })
+        body: JSON.stringify({ reseaux, style, date: datepick })
       });
 
       const data = await res.json();
       const r = document.getElementById('resultat');
       r.innerHTML = '';
-
       for (const [key, val] of Object.entries(data.postages)) {
-        r.innerHTML += `<h3>${key}</h3><p>${val.texte}</p><p>${val.hashtags.join(' ')}</p>`;
+        const id = `copy_${key}`;
+        r.innerHTML += `<h3>${key}</h3>
+                        <p id="${id}">${val.texte}<br>${val.hashtags.join(' ')}</p>
+                        <button onclick="copierTexte('${id}')">📋 Copier</button>
+                        <button onclick="reuseTexte('${id}')">♻️ Réutiliser</button><hr>`;
       }
 
       const jours = document.getElementById('jours');
@@ -65,7 +84,59 @@
           jours.innerHTML += `<li><strong>${j.date}</strong> : ${j.evenement}</li>`;
         });
       }
+
+      document.getElementById('loader').style.display = "none";
+      chargerHistorique();
     }
+
+    async function genererAleatoire() {
+      document.getElementById('loader').style.display = "block";
+      const reseaux = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(el => el.value);
+      const res = await fetch('/api/genere-aleatoire', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reseaux })
+      });
+      const data = await res.json();
+      const r = document.getElementById('resultat');
+      r.innerHTML = '';
+      for (const [key, val] of Object.entries(data.postages)) {
+        const id = `copy_${key}`;
+        r.innerHTML += `<h3>${key}</h3>
+                        <p id="${id}">${val.texte}<br>${val.hashtags.join(' ')}</p>
+                        <button onclick="copierTexte('${id}')">📋 Copier</button>
+                        <button onclick="reuseTexte('${id}')">♻️ Réutiliser</button><hr>`;
+      }
+      document.getElementById('loader').style.display = "none";
+      chargerHistorique();
+    }
+
+    function copierTexte(id) {
+      const texte = document.getElementById(id).innerText;
+      navigator.clipboard.writeText(texte).then(() => alert("✅ Post copié"));
+    }
+
+    function reuseTexte(id) {
+      const texte = document.getElementById(id).innerText;
+      alert("Texte réutilisé :
+
+" + texte);
+    }
+
+    async function chargerHistorique() {
+      const res = await fetch('/static/historique.json');
+      if (res.ok) {
+        const data = await res.json();
+        const histo = document.getElementById('historique');
+        histo.innerHTML = '';
+        data.slice(-5).reverse().forEach(post => {
+          histo.innerHTML += `<p><strong>${post.reseau}</strong> (${new Date(post.date).toLocaleString()}):<br>${post.texte}<br>${post.hashtags.join(' ')}</p><hr>`;
+        });
+      }
+    }
+
+    document.getElementById('loader').style.display = "none";
+    chargerHistorique();
   </script>
 </body>
 </html>
