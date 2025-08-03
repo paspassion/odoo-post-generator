@@ -32,7 +32,7 @@ def journees_a_venir(n=5):
             resultats.append({
                 "date": d.strftime("%d/%m/%Y"),  # format lisible
                 "evenement": JOURNEES[cle]
-            })
+                })
             if len(resultats) >= n:
                 break
     return resultats
@@ -63,7 +63,7 @@ def genere_post():
             "texte": texte,
             "hashtags": hashtags,
             "avenir": avenir
-        }
+            }
 
     return jsonify({"postages": postages})
 

@@ -10,7 +10,7 @@
     label, select, input { display: block; margin-top: 1rem; }
     button { margin-top: 1rem; padding: 0.5rem 1rem; }
     .result { margin-top: 2rem; background: #f0f0f0; padding: 1rem; border-radius: 8px; }
-    #loader { margin-top: 1rem; font-style: italic; color: grey; }
+    #loader { margin-top: 1rem; font-style: italic; color: grey; display: none; }
   </style>
 </head>
 <body>
@@ -67,26 +67,7 @@
       });
 
       const data = await res.json();
-      const r = document.getElementById('resultat');
-      r.innerHTML = '';
-      for (const [key, val] of Object.entries(data.postages)) {
-        const id = `copy_${key}`;
-        r.innerHTML += `<h3>${key}</h3>
-                        <p id="${id}">${val.texte}<br>${val.hashtags.join(' ')}</p>
-                        <button onclick="copierTexte('${id}')">📋 Copier</button>
-                        <button onclick="reuseTexte('${id}')">♻️ Réutiliser</button><hr>`;
-      }
-
-      const jours = document.getElementById('jours');
-      jours.innerHTML = '';
-      if (data.postages[reseaux[0]].avenir) {
-        data.postages[reseaux[0]].avenir.forEach(j => {
-          jours.innerHTML += `<li><strong>${j.date}</strong> : ${j.evenement}</li>`;
-        });
-      }
-
-      document.getElementById('loader').style.display = "none";
-      chargerHistorique();
+      afficherResultats(data, reseaux);
     }
 
     async function genererAleatoire() {
@@ -98,6 +79,10 @@
         body: JSON.stringify({ reseaux })
       });
       const data = await res.json();
+      afficherResultats(data, reseaux);
+    }
+
+    function afficherResultats(data, reseaux) {
       const r = document.getElementById('resultat');
       r.innerHTML = '';
       for (const [key, val] of Object.entries(data.postages)) {
@@ -106,6 +91,13 @@
                         <p id="${id}">${val.texte}<br>${val.hashtags.join(' ')}</p>
                         <button onclick="copierTexte('${id}')">📋 Copier</button>
                         <button onclick="reuseTexte('${id}')">♻️ Réutiliser</button><hr>`;
+      }
+      const jours = document.getElementById('jours');
+      jours.innerHTML = '';
+      if (data.postages[reseaux[0]].avenir) {
+        data.postages[reseaux[0]].avenir.forEach(j => {
+          jours.innerHTML += `<li><strong>${j.date}</strong> : ${j.evenement}</li>`;
+        });
       }
       document.getElementById('loader').style.display = "none";
       chargerHistorique();
@@ -118,9 +110,7 @@
 
     function reuseTexte(id) {
       const texte = document.getElementById(id).innerText;
-      alert("Texte réutilisé :
-
-" + texte);
+      alert("Texte réutilisé :\n\n" + texte);
     }
 
     async function chargerHistorique() {
@@ -135,7 +125,6 @@
       }
     }
 
-    document.getElementById('loader').style.display = "none";
     chargerHistorique();
   </script>
 </body>
