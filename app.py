@@ -29,10 +29,10 @@ def journees_a_venir(n=5):
         d = today + timedelta(days=i)
         cle = d.strftime("%d-%m")  # format '02-08'
         if cle in JOURNEES:
-            resultats.append({
+            resultats.append({{
                 "date": d.strftime("%d/%m/%Y"),  # format lisible
                 "evenement": JOURNEES[cle]
-                })
+                }})
             if len(resultats) >= n:
                 break
     return resultats
@@ -40,10 +40,10 @@ def journees_a_venir(n=5):
 
 def generer_post(event, reseau):
     phrases = [
-        f"🎯 En cette {event}, pensez à nos {random.choice(CONTENU_SITE['produits'])}",
-        f"🚨 Pour {event}, découvrez nos {random.choice(CONTENU_SITE['services'])}",
-        f"💡 Conseil du jour ({event}) : {random.choice(CONTENU_SITE['conseils'])}",
-        f"📢 Aujourd'hui c’est {event} — engagez-vous avec Passion Prévention !"
+        f"🎯 En cette {{event}}, pensez à nos {{random.choice(CONTENU_SITE['produits'])}}",
+        f"🚨 Pour {{event}}, découvrez nos {{random.choice(CONTENU_SITE['services'])}}",
+        f"💡 Conseil du jour ({{event}}) : {{random.choice(CONTENU_SITE['conseils'])}}",
+        f"📢 Aujourd'hui c’est {{event}} — engagez-vous avec Passion Prévention !"
     ]
     texte = random.choice(phrases)
     hashtags = ["#sécurité", "#prévention", "#PassionPrévention"]
@@ -56,16 +56,16 @@ def genere_post():
     event = journee_du_jour() or "la sécurité au quotidien"
     avenir = journees_a_venir()
 
-    postages = {}
+    postages = {{}}
     for r in reseaux:
         texte, hashtags = generer_post(event, r)
-        postages[r] = {
+        postages[r] = {{
             "texte": texte,
             "hashtags": hashtags,
             "avenir": avenir
-            }
+            }}
 
-    return jsonify({"postages": postages})
+    return jsonify({{"postages": postages}})
 
 # ✅ Route principale pour servir index.html
 @app.route('/')
