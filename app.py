@@ -38,6 +38,55 @@ def journees_a_venir(n=5):
     return resultats
 
 
+# ANCIEN MOTEUR SUPPRIMÉ
+
+def generate_rich_post(product):
+    import random
+    titre = product["title"]
+    desc = product["description"][:200].strip()
+
+    intro = random.choice([
+        f"🔴 POST SÉCURITÉ – {titre}",
+        f"🛡️ Focus produit : {titre}",
+        f"🎯 Mettez en avant : {titre}",
+        f"🚨 Besoin de prévention ? Découvrez : {titre}"
+    ])
+
+    contexte = random.choice([
+        "Soirée ? Festival ? Mariage ?",
+        "Sur vos événements festifs...",
+        "En entreprise comme en collectivité...",
+        "Pour vos animations de prévention...",
+        "En libre accès ou en atelier encadré..."
+    ])
+
+    appel = random.choice([
+        "✔️ Disponible dès aujourd’hui.",
+        "✔️ À utiliser avec modération.",
+        "✔️ Inclus dans nos packs événementiels.",
+        "✔️ Livré partout en France.",
+        "✔️ Compatible avec nos animations sécurité."
+    ])
+
+    texte = f"{intro}\n{desc}\n{contexte}\n{appel}\n\n📍 Plus d’infos :\n🔗 www.passion-prevention.com"
+
+    mots = set(texte.lower().replace("’", "'").split())
+    base_tags = {"#sécurité", "#prévention", "#PassionPrévention"}
+    dyn_tags = {
+        f"#{m.strip('.,!?').lower()}"
+        for m in mots
+        if len(m) > 4 and m[0].isalpha() and not m.startswith("www")
+    }
+
+    hashtags = list((base_tags | dyn_tags) - {"#https", "#www", "#com"})
+    return {
+        "reseau": "multi",
+        "titre": titre,
+        "texte": texte,
+        "hashtags": sorted(hashtags)[:12]
+    }
+
+
 def generer_post(event, reseau):
     phrases = [
         f"🎯 En cette {event}, pensez à nos {random.choice(CONTENU_SITE['produits'])}",
