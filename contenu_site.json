@@ -1,0 +1,43 @@
+{
+  "services": [
+    "location de bornes éthylotests",
+    "location d’extincteurs",
+    "formations en prévention des risques professionnels",
+    "formation incendie",
+    "formation à la manipulation des extincteurs",
+    "formation à la gestion d'évacuation",
+    "formation guide-file et serre-file",
+    "formation habilitation électrique H0 B0",
+    "formation habilitation électrique BS BE Manoeuvre",
+    "formation habilitation électrique B2V BR BC",
+    "étalonnage de bornes éthylotests",
+    "plans d’intervention / évacuation conformes NF X08‑070"
+  ],
+  "produits": [
+    "borne éthylotest fixe ou mobile",
+    "extincteur à poudre ABC 6kg",
+    "détecteur de fumée autonome",
+    "déclencheur manuel PPMS type 4 radio",
+    "signalisation de sécurité photoluminescente",
+    "barrière gonflable anti-inondation",
+    "kit d'intervention électrique NFC 18-510",
+    "gilet haute visibilité",
+    "mallette de secours BTP",
+    "alarme PPMS école",
+    "panneaux d’évacuation conformes NF X08‑070",
+    "valise de formation incendie avec extincteur pédagogique",
+    "affiche d'instruction sécurité incendie"
+  ],
+  "conseils": [
+    "Testez-vous avant de reprendre le volant.",
+    "Vérifiez la date de péremption de vos extincteurs chaque année.",
+    "Pensez à signaler les sorties de secours dans vos locaux.",
+    "Ne surchargez jamais une multiprise sur un chantier.",
+    "Placez les extincteurs à portée visible et facile d’accès.",
+    "Equipez vos événements en bornes éthylotests pour éviter les drames.",
+    "Formez vos salariés aux gestes de premier secours.",
+    "Organisez régulièrement des exercices d’évacuation.",
+    "Mettez à jour vos plans d’intervention en cas de réaménagement.",
+    "Prévoyez une mallette de secours sur chaque chantier."
+  ]
+}
