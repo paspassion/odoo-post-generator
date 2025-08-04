@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Générateur de posts réseaux sociaux</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-800 p-6">
+
+  <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-8 space-y-6">
+    <h1 class="text-3xl font-bold text-blue-700">🎯 Générateur de posts réseaux sociaux</h1>
+
+    <form id="post-form" class="space-y-4">
+      <div>
+        <label class="block mb-1 font-semibold">Choisis un mois :</label>
+        <select name="mois" class="w-full p-2 border rounded">
+          <option>Août</option>
+          <option>Septembre</option>
+          <option>Octobre</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block mb-1 font-semibold">Choisis une année :</label>
+        <select name="annee" class="w-full p-2 border rounded">
+          <option>2025</option>
+          <option>2026</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block mb-1 font-semibold">Réseaux sociaux :</label>
+        <div class="space-x-2">
+          <label><input type="checkbox" name="reseaux" value="Facebook"> Facebook</label>
+          <label><input type="checkbox" name="reseaux" value="Instagram"> Instagram</label>
+          <label><input type="checkbox" name="reseaux" value="LinkedIn"> LinkedIn</label>
+          <label><input type="checkbox" name="reseaux" value="TikTok"> TikTok</label>
+        </div>
+      </div>
+
+      <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Générer les posts</button>
+    </form>
+
+    <div id="resultats" class="space-y-4"></div>
+
+    <hr class="my-8 border-gray-300">
+    <h2 class="text-2xl font-bold mb-4">📋 Historique des posts générés</h2>
+
+    <div class="flex justify-between items-center mb-4">
+      <button onclick="viderHistorique()" class="text-red-500 hover:underline">🗑️ Vider l'historique</button>
+      <a href="static/historique.json" download class="text-blue-600 hover:underline">⬇️ Télécharger l'historique</a>
+    </div>
+
+    <div id="historique-container" class="space-y-4">
+      <p class="text-gray-500">Chargement des anciens posts...</p>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("post-form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const mois = form.mois.value;
+      const annee = form.annee.value;
+      const reseaux = Array.from(form.querySelectorAll('input[name="reseaux"]:checked')).map(e => e.value);
+
+      const res = await fetch("/api/genere-post", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mois, annee, reseaux })
+      });
+
+      const data = await res.json();
+      const div = document.getElementById("resultats");
+      div.innerHTML = "";
+
+      Object.entries(data.posts).forEach(([reseau, contenu]) => {
+        const bloc = document.createElement("div");
+        bloc.classList = "border border-gray-300 p-4 rounded bg-gray-50";
+        bloc.innerHTML = `
+          <p><strong>📱 ${reseau}</strong></p>
+          <p>${contenu.texte}</p>
+          <p class="text-blue-700">${contenu.hashtags.join(" ")}</p>
+          <p class="text-sm text-gray-500">Prévu le ${contenu.date_diffusion}</p>
+        `;
+        div.appendChild(bloc);
+      });
+
+      chargerHistorique();
+    });
+
+    async function chargerHistorique() {
+      const container = document.getElementById("historique-container");
+      try {
+        const res = await fetch("static/historique.json");
+        const historique = await res.json();
+        container.innerHTML = "";
+
+        historique.reverse().forEach(post => {
+          const bloc = document.createElement("div");
+          bloc.classList = "border border-gray-200 p-4 rounded-md bg-white shadow";
+
+          bloc.innerHTML = `
+            <p><strong>🗓️ Généré le :</strong> ${post.date_generation}</p>
+            <p><strong>📤 Diffusion prévue :</strong> ${post.date_diffusion}</p>
+            <p><strong>📱 Réseau :</strong> ${post.reseau}</p>
+            <p><strong>📝 Texte :</strong><br>${post.texte}</p>
+            <p><strong>#️⃣ Hashtags :</strong> ${post.hashtags.join(" ")}</p>
+          `;
+          container.appendChild(bloc);
+        });
+      } catch (err) {
+        container.innerHTML = "<p class='text-red-500'>Erreur lors du chargement de l'historique.</p>";
+      }
+    }
+
+    async function viderHistorique() {
+      if (confirm("Supprimer tout l'historique ?")) {
+        await fetch("/api/reset-historique", { method: "POST" });
+        chargerHistorique();
+      }
+    }
+
+    window.addEventListener("load", chargerHistorique);
+  </script>
+
+</body>
+</html>
