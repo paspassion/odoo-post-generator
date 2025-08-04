@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Générateur de Posts</title>
+</head>
+<body>
+  <h1>📣 Générateur de Posts Réseaux Sociaux</h1>
+  <button onclick="genererPosts()">Générer des posts</button>
+  <pre id="resultat"></pre>
+
+  <script>
+    async function genererPosts() {
+      const response = await fetch("/api/genere-post", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reseaux: ["Facebook", "Instagram", "LinkedIn", "TikTok"] })
+      });
+      const posts = await response.json();
+      document.getElementById("resultat").textContent = JSON.stringify(posts, null, 2);
+    }
+  </script>
+</body>
+</html>
