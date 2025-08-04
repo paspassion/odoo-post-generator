@@ -1,70 +1,78 @@
-import os, random
-import requests
-from flask import Flask, jsonify, request, send_from_directory
+import os, random, json
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from datetime import datetime, timedelta
-from bs4 import BeautifulSoup
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')  # déclaration du dossier static
 CORS(app)
 
-def scraper_produits():
-    url = "https://www.passion-prevention.com/shop"
-    headers = {"User-Agent": "Mozilla/5.0"}
-    r = requests.get(url, headers=headers)
-    soup = BeautifulSoup(r.text, "html.parser")
-    produits = [p.get_text(strip=True) for p in soup.select(".oe_product, .product_title") if p.get_text(strip=True)]
-    return produits if produits else ["borne éthylotest", "extincteur", "gilet haute visibilité"]
+# Clé API (optionnelle si non utilisée)
+SERPAPI_API_KEY = os.getenv("SERPAPI_API_KEY", "91ab2470b52f1166f64f1267c08e3a3792c1df343c4936a597fb3e0a762c66f3")
 
-themes = [
-    "Conseil sécurité incendie",
-    "Vidéo TikTok Borne",
-    "Promo location borne",
-    "Témoignage client",
-    "Prévention routière",
-    "Astuce sécurité électrique",
-    "Équipement obligatoire en entreprise"
-]
+# Chargement des données
+with open('contenu_site.json', encoding='utf-8') as f:
+    CONTENU_SITE = json.load(f)
 
-reseaux_par_theme = {
-    "Conseil sécurité incendie": ["Facebook", "Instagram", "LinkedIn"],
-    "Vidéo TikTok Borne": ["TikTok", "Instagram"],
-    "Promo location borne": ["Facebook", "Instagram", "LinkedIn", "TikTok"],
-    "Témoignage client": ["Facebook", "LinkedIn"],
-    "Prévention routière": ["Facebook", "Instagram"],
-    "Astuce sécurité électrique": ["LinkedIn", "Facebook"],
-    "Équipement obligatoire en entreprise": ["LinkedIn", "Instagram"]
-}
+with open('journees.json', encoding='utf-8') as f:
+    JOURNEES = json.load(f)
 
-hashtags_generaux = [
-    "#Sécurité", "#Prévention", "#Risques", "#Formation", "#Équipements",
-    "#PassionPrévention", "#TravailEnSécurité", "#QHSE", "#Incendie", "#BTP", "#Responsabilité"
-]
+def journee_du_jour():
+    today = datetime.now()
+    return JOURNEES.get(today.strftime("%d-%m"))
 
-@app.route('/api/genere-post', methods=["POST"])
+from datetime import datetime, timedelta
+
+def journees_a_venir(n=5):
+    today = datetime.now()
+    resultats = []
+    for i in range(1, 31):  # 30 prochains jours
+        d = today + timedelta(days=i)
+        cle = d.strftime("%d-%m")  # format '02-08'
+        if cle in JOURNEES:
+            resultats.append({
+                "date": d.strftime("%d/%m/%Y"),  # format lisible
+                "evenement": JOURNEES[cle]
+            })
+            if len(resultats) >= n:
+                break
+    return resultats
+
+
+def generer_post(event, reseau):
+    phrases = [
+        f"🎯 En cette {event}, pensez à nos {random.choice(CONTENU_SITE['produits'])}",
+        f"🚨 Pour {event}, découvrez nos {random.choice(CONTENU_SITE['services'])}",
+        f"💡 Conseil du jour ({event}) : {random.choice(CONTENU_SITE['conseils'])}",
+        f"📢 Aujourd'hui c’est {event} — engagez-vous avec Passion Prévention !"
+    ]
+    texte = random.choice(phrases)
+    hashtags = ["#sécurité", "#prévention", "#PassionPrévention"]
+    return texte, hashtags
+
+@app.route('/api/genere-post', methods=['POST'])
 def genere_post():
-    produits = scraper_produits()
-    posts = []
-    start_date = datetime.today()
-    for i in range(4):  # génère 4 posts
-        date = start_date + timedelta(days=i * 3)
-        theme = random.choice(themes)
-        texte = f"🚨 {theme} : Découvrez notre solution {random.choice(produits)} sur www.passion-prevention.com"
-        hashtags = random.sample(hashtags_generaux, 10)
-        posts.append({
-            "date": date.strftime("%d/%m/%Y"),
-            "jour": date.strftime("%A"),
-            "theme": theme,
-            "texte": texte,
-            "reseaux": reseaux_par_theme[theme],
-            "hashtags": hashtags
-        })
-    return jsonify({"posts": posts})
+    data = request.get_json()
+    mois, annee, reseaux = data.get("mois"), data.get("annee"), data.get("reseaux", [])
+    event = journee_du_jour() or "la sécurité au quotidien"
+    avenir = journees_a_venir()
 
+    postages = {}
+    for r in reseaux:
+        texte, hashtags = generer_post(event, r)
+        postages[r] = {
+            "texte": texte,
+            "hashtags": hashtags,
+            "avenir": avenir
+        }
+
+    return jsonify({"postages": postages})
+
+# ✅ Route principale pour servir index.html
 @app.route('/')
-def root():
+def home():
     return send_from_directory('static', 'index.html')
 
-if __name__ == "__main__":
+# ✅ Démarrage de l'application (compatible Render)
+if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host='0.0.0.0', port=port)
