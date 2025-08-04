@@ -10,8 +10,8 @@ CORS(app)
 SERPAPI_API_KEY = os.getenv("SERPAPI_API_KEY", "91ab2470b52f1166f64f1267c08e3a3792c1df343c4936a597fb3e0a762c66f3")
 
 # Chargement des données
-with open('contenu_site.json', encoding='utf-8') as f:
-    CONTENU_SITE = json.load(f)
+from scraper import scraper_contenu_site
+    contenu = scraper_contenu_site()
 
 with open('journees.json', encoding='utf-8') as f:
     JOURNEES = json.load(f)
